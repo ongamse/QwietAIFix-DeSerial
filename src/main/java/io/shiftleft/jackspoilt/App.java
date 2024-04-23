@@ -11,33 +11,31 @@ public class App {
     private static final File logFile = new File("application.log");
 
     public static void main(String[] args) throws IOException {
-        // Assume that the request and response objects are passed as parameters to this method
-        handleRequestAndResponse(null, null);
-    }
+        // Assume we have a request and response object here
+        Request request = new Request();
+        Response response = new Response();
 
-    public static String handleRequestAndResponse(Request request, Response response) throws IOException {
-        // Write the request body to the log file
-        FileUtils.writeStringToFile(logFile, "/accounts -> " + request.getBody(), StandardCharsets.UTF_8, true);
+        // Log the request body
+        FileUtils.writeStringToFile(logFile, request.getBody(), StandardCharsets.UTF_8, true);
 
-        Account account = deserialize(request);
+        // Deserialize the request body into an Account object
+        Account account = mapper.readValue(request.getBody(), Account.class);
 
+        // If the account is valid, add it to the accounts and return a 201 status
         if (account != null) {
-            Account res = addAccount(account);
+            Accounts accounts = new Accounts();
+            Account res = accounts.add(account);
             response.setStatus(201);
-            return mapper.writeValueAsString(res);
-        } else {
+            String jsonResponse = mapper.writeValueAsString(res);
+            FileUtils.writeStringToFile(logFile, jsonResponse, StandardCharsets.UTF_8, true);
+            return jsonResponse;
+        } 
+
+        // If the account is invalid, return a 400 status
+        else {
             response.setStatus(400);
+            FileUtils.writeStringToFile(logFile, "Invalid content", StandardCharsets.UTF_8, true);
             return "Invalid content";
         }
-    }
-
-    private static Account deserialize(Request request) throws IOException {
-        return mapper.readValue(request.getBody(), Account.class);
-    }
-
-    private static Account addAccount(Account account) throws IOException {
-        // Add the account to the database and return the result
-        // This is a placeholder for actual implementation
-        return account;
     }
 }
