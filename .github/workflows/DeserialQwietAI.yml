@@ -19,7 +19,7 @@ jobs:
         java-version: 11
       
     - name: Package with maven
-      run: mvn clean compile package
+      run: mvn clean package
       
     - name: Download ShiftLeft CLI
       run: |
