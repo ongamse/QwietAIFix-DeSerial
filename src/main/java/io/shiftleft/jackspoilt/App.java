@@ -1,60 +1,43 @@
 package io.shiftleft.jackspoilt;
 
-import com.fasterxml.jackson.core.JsonParseException;
-import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
-import static spark.Spark.*;
-
+import org.apache.commons.io.FileUtils;
+import java.io.File;
 import java.io.IOException;
-import java.util.Collection;
-import spark.Request;
+import java.nio.charset.StandardCharsets;
 
 public class App {
+    private static final ObjectMapper mapper = new ObjectMapper();
+    private static final File logFile = new File("application.log");
 
-  private static final Logger log = LoggerFactory.getLogger(App.class);
-
-  /*
-  Trigger Gadget Chain
-   */
-  private static ObjectMapper deserializer = new ObjectMapper().enableDefaultTyping();
-  private static ObjectMapper serializer = new ObjectMapper();
-  private static AccountStore accounts = new AccountStore();
-
-  public static void main(String[] args) {
-    port(8888);
-
-    get("/accounts", (request, response) -> {
-      Collection<Account> res = accounts.list();
-      log.info("/accounts -> {}", res);
-      return serializer.writeValueAsString(res);
-    });
-
-    post("/accounts", (request, response) -> {
-      log.info("/accounts -> {}", request.body());
-      Account account = deserialize(request);
-      if (account != null) {
-        Account res = accounts.add(account);
-        response.status(201);
-        return serializer.writeValueAsString(res);
-      } else {
-        response.status(400);
-        return "Invalid content";
-      }
-    });
-
-
-  }
-
-  private static Account deserialize(Request request)
-      throws IOException, JsonParseException, JsonMappingException {
-    try {
-      return deserializer.readValue(request.body(), Account.class);
-    } catch (Exception any) {
-      log.warn("Unexpected exception deserializing content: {}", any.getClass());
-      return null;
+    public static void main(String[] args) throws IOException {
+        // Assume that the request and response objects are passed as parameters to this method
+        handleRequestAndResponse(null, null);
     }
-  }
+
+    public static String handleRequestAndResponse(Request request, Response response) throws IOException {
+        // Write the request body to the log file
+        FileUtils.writeStringToFile(logFile, "/accounts -> " + request.getBody(), StandardCharsets.UTF_8, true);
+
+        Account account = deserialize(request);
+
+        if (account != null) {
+            Account res = addAccount(account);
+            response.setStatus(201);
+            return mapper.writeValueAsString(res);
+        } else {
+            response.setStatus(400);
+            return "Invalid content";
+        }
+    }
+
+    private static Account deserialize(Request request) throws IOException {
+        return mapper.readValue(request.getBody(), Account.class);
+    }
+
+    private static Account addAccount(Account account) throws IOException {
+        // Add the account to the database and return the result
+        // This is a placeholder for actual implementation
+        return account;
+    }
 }
