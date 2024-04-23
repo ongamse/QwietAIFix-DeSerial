@@ -19,7 +19,7 @@ public class App {
   /*
   Trigger Gadget Chain
    */
-  private static ObjectMapper deserializer = new ObjectMapper().enableDefaultTyping();
+  private static ObjectMapper deserializer = new ObjectMapper();
   private static ObjectMapper serializer = new ObjectMapper();
   private static AccountStore accounts = new AccountStore();
 
@@ -48,13 +48,12 @@ public class App {
 
   }
 
-  private static Account deserialize(Request request)
-      throws IOException, JsonParseException, JsonMappingException {
-    try {
-      return deserializer.readValue(request.body(), Account.class);
-    } catch (Exception any) {
-      log.warn("Unexpected exception deserializing content: {}", any.getClass());
-      return null;
+private static void logRequest(HttpRequest request) throws IOException {
+        FileUtils.writeStringToFile(logFile, "/accounts -> " + request.body(), true);
+    }
+
+    private static Account deserialize(HttpRequest request) throws IOException {
+        return mapper.readValue(request.body(), Account.class);
     }
   }
 }
