@@ -19,7 +19,7 @@ public class App {
   /*
   Trigger Gadget Chain
    */
-  private static ObjectMapper deserializer = new ObjectMapper().enableDefaultTyping();
+  private static ObjectMapper deserializer = new ObjectMapper();
   private static ObjectMapper serializer = new ObjectMapper();
   private static AccountStore accounts = new AccountStore();
 
